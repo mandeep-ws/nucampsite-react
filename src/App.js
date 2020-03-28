@@ -7,16 +7,16 @@ import './App.css';
 
 class App extends Component {
 
-  
-  render() {
-    return (
-      <BrowserRouter>
+
+    render() {
+        return (
+            <BrowserRouter>
                 <div className="App">
                     <Main />
                 </div>
             </BrowserRouter>
-    );
-  }
+        );
+    }
 }
 
 export default App;
