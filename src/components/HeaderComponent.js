@@ -14,7 +14,7 @@ class Header extends Component {
         this.toggleModal = this.toggleModal.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
         this.state = {
-            isNavOpen: false
+            isNavOpen: false,
             isModalOpen: false
         };
     }
@@ -77,6 +77,11 @@ class Header extends Component {
                                     </NavLink>
                                 </NavItem>
                             </Nav>
+                            <span className="navbar-text ml-auto">
+                                <Button outline onClick={this.toggleModal}>
+                                    <i className="fa fa-sign-in fa-lg" /> Login
+                                </Button>
+                            </span>
                         </Collapse>
                     </div>
                 </Navbar>
