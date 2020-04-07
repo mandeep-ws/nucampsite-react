@@ -2,12 +2,15 @@ import React, { Component } from "react";
 import { Card, CardImg, CardText, CardBody, Breadcrumb, BreadcrumbItem, Button, Modal, ModalHeader, ModalBody, Label, Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { Control, LocalForm, Errors } from 'react-redux-form';
+import { Loading } from './LoadingComponent';
+
 
 
 
 
 const maxLength = len => val => !val || (val.length <= len);
 const minLength = len => val => val && (val.length >= len);
+const required = val => val && val.length;
 
 
 function RenderCampsite({ campsite }) {
@@ -24,7 +27,7 @@ function RenderCampsite({ campsite }) {
         </div>
     );
 }
-function RenderComments({ comments }) {
+function RenderComments({ comments, addComment, campsiteId }) {
 
     if (comments) {
         return (
@@ -41,7 +44,7 @@ function RenderComments({ comments }) {
                         }).format(new Date(Date.parse(comment.date)))}
                     </div>
                 ))}
-                <CommentForm />
+                <CommentForm campsiteId={campsiteId} addComment={addComment}/>
             </div>
         );
     }
@@ -61,14 +64,11 @@ class CommentForm extends Component{
         this.state = {
 
             rating: 1,
-            text: '',
             author: '',
+            text: '',
             isModalOpen: false,
             touched: {
-             
                 author: false,
-         
-              
             }
         };
 
@@ -76,9 +76,8 @@ class CommentForm extends Component{
 
 
     handleSubmit(values) {
-        console.log('Current state is: ' + JSON.stringify(values));
-        alert('Current state is: ' + JSON.stringify(values));
-
+        this.toggleModal();
+        this.props.addComment(this.props.campsiteId, values.rating, values.author, values.text);
     }
 
 
@@ -105,7 +104,7 @@ class CommentForm extends Component{
                                 <Label htmlFor="rating" md={2}>Rating</Label>
                                 <Col md={10}>
                                     <Control.select model=".rating" name="rating"
-                                        className="form-control">
+                                        className="form-control" defaultValue="1">
                                         <option>1</option>
                                         <option>2</option>
                                         <option>3</option>
@@ -122,6 +121,7 @@ class CommentForm extends Component{
                                         placeholder="Your Name"
                                         className="form-control"
                                         validators={{
+                                            required,
                                             minLength: minLength(2),
                                             maxLength: maxLength(15)
                                         }} />
@@ -131,7 +131,6 @@ class CommentForm extends Component{
                                         show="touched"
                                         component="div"
                                         messages={{
-                                            required: 'Required',
                                             minLength: 'Must be at least 2 characters',
                                             maxLength: 'Must be 15 characters or less'
                                         }} />
@@ -146,7 +145,18 @@ class CommentForm extends Component{
                                     <Control.textarea model=".text" id="feedback" name="feedback"
                                         rows="6"
                                         className="form-control"
-                                    />
+                                        validators={{
+                                            required,                                           
+                                        }} />
+                                    <Errors
+                                        className="text-danger"
+                                        model=".text"
+                                        show="touched"
+                                        component="div"
+                                        messages={{
+                                            required: "Please enter message"
+                                        }} />
+                                
                                 </Col>
                             </Row>
 
@@ -179,6 +189,27 @@ class CommentForm extends Component{
 }
 
 function CampsiteInfo(props) {
+
+    if (props.isLoading) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <Loading />
+                </div>
+            </div>
+        );
+    }
+    if (props.errMess) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <div className="col">
+                        <h4>{props.errMess}</h4>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     if (props.campsite) {
         return (
             <div className="container">
@@ -194,7 +225,10 @@ function CampsiteInfo(props) {
                 </div>
                 <div className="row">
                     <RenderCampsite campsite={props.campsite} />
-                    <RenderComments comments={props.comments} />
+                    <RenderComments comments={props.comments}
+                        addComment={props.addComment}
+                        campsiteId={props.campsite.id} />
+                        
                 </div>
             </div>
         );
